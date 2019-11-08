@@ -7,7 +7,7 @@ from threading import Thread
 class LedThread(Thread):
 
   def __init__(self, led):
-    super(LedThread, self).__init__(daemon=True)
+    super(LedThread, self).__init__()
     self.queue = []
     self.is_stopped = False
     self.led = led

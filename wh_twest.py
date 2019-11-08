@@ -19,6 +19,7 @@ def foo():
 @app.route('/event_triggered', methods=['POST'])
 def event_triggered(**kwargs):
     type = request.args.get("type", None)
+    print(type)
     q.put(type)
 
     return {
@@ -35,31 +36,27 @@ def led_loop(q):
 
     while True:
         if q.qsize() > 0:
-            try:
-                type = q.get(False)
-                print(type)
-            except:
-                continue
-            else:
-                print("something has to be triggered")
-                if type == "modswitch":
-                    print("-> triggers modswitch")
-                    rgb.modSwitchLoop()
-                elif type == "follows":
+          type = q.get(False)
 
-                    rgb.run("blink", 'g', 0.5, .6,)
-                elif type == "streamchange":
-                    print("-> triggers streamchange")
-                    rgb.streamChangeLoop()
-                elif type == "subscription":
-                    rgb.run(("blink", 'b', 10.5, .5,))
-                    rgb.run(("blink", 'r', 10, 1,))
-                    rgb.run(("blink", 'g', 9.5, 1.5,))
-                else:
-                    print("-> triggers default")
-                    rgb.defaultEventLoop()
+          if type == "modswitch":
+            rgb.modSwitchLoop()
+
+          elif type == "follows":
+            rgb.followLoop()
+
+          elif type == "streamchange":
+            rgb.streamChangeLoop()
+
+          elif type == "subscription":
+              rgb.black()
+              rgb.subscriptionLoop()
+
+          else:
+            print("-> triggers default")
+            rgb.defaultEventLoop()
         else:
-            rgb.queue(("breath", 'r', 0.3, 2.0,))
+            rgb.black()
+            rgb.breath(rgb.r, 1/10, 1<<8, 1<<16)
 
 if __name__ == '__main__':
     q = Queue()

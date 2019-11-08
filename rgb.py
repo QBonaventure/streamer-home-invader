@@ -7,25 +7,11 @@ from ledThread import LedThread
 
 class RGB:
 
+
   def __init__(self):
-    self.r = LedThread(PWMLED("GPIO6"))
-    self.g = LedThread(PWMLED("GPIO16"))
-    self.b = LedThread(PWMLED("GPIO20"))
-    self.queue = []
-
-
-  def queue(self, *args):
-      self.queue.append(args)
-      print(self.queue)
-      led = getattr(self, args[0])
-      print(fun)
-      led.toRun(getattr(self, fun), args)
-
-
-  def run(self, fun, *args):
-    led = getattr(self, args[0])
-    print(fun)
-    led.toRun(getattr(self, fun), args)
+    self.r = PWMLED("GPIO6")
+    self.g = PWMLED("GPIO16")
+    self.b = PWMLED("GPIO20")
 
 
   def setAll(self, value):
@@ -33,18 +19,18 @@ class RGB:
     self.g.value = value
     self.b.value = value
 
+
   def black(self):
     self.setAll(0)
+
 
   def white(self):
     self.setAll(1)
 
 
-
   def defaultEventLoop(self):
       i = 0
       st = .2
-
       self.black()
 
       while(i < 20):
@@ -56,20 +42,25 @@ class RGB:
         sleep(st*5)
         i = i+1
 
+
   def streamChangeLoop(self):
-      i = 0
+      n = 0
       st = .2
 
-      self.black()
-
-      while(i < 20):
-        self.r.value = 1
-        self.g.value = 1
-        self.b.value = 1
-        sleep(st*3)
-        self.black()
-        sleep(st)
-        i = i+1
+      while(n < 5):
+          self.black()
+          self.r.value = 1
+          self.g.value = 1
+          self.b.value = 1
+          i = 0
+          while(i < 19):
+            self.r.value = self.r.value - 0.05
+            self.g.value = self.g.value - 0.05
+            self.b.value = self.b.value - 0.05
+            sleep(0.1)
+            i = i+1
+          self.black()
+          n = n+1
 
 
   def subscriptionLoop(self):
@@ -78,13 +69,12 @@ class RGB:
 
       self.black()
 
-      while(i < 20):
-        print('zzzzz')
-        self.g.value = .7
+      while(i < 60):
+        self.g.value = .6
         self.r.value = 1
         sleep(st)
-        self.g.value = 0.4
-        self.r.value = 0.7
+        self.g.value = 0.1
+        self.r.value = 0.5
         sleep(st)
         i = i+1
 
@@ -95,11 +85,11 @@ class RGB:
 
       self.black()
 
-      while(i < 20):
+      while(i < 5):
         self.g.value = 1
         sleep(st)
-        self.g.value = 0.4
-        sleep(st)
+        self.g.value = 0
+        sleep(0.8)
         i = i+1
 
 
@@ -130,58 +120,24 @@ class RGB:
         i = i+1
 
 
-  def breath(self, led):
-    sleepTime = 1/10
-
-    minValue = 1
-    maxValue = 1 << 12
+  def breath(self, led, sleepTime, minValue, maxValue = 1<<8):
     lvalue = minValue
-    print(led)
+
     while(lvalue < maxValue):
-      led.value = lvalue/maxValue
+      led.value = (lvalue-1)/maxValue
       lvalue = lvalue << 1
       sleep(sleepTime)
+
     sleep(sleepTime)
+
     while(lvalue >= minValue):
-      led.value = lvalue/maxValue
+      led.value = (lvalue-1)/maxValue
       lvalue = lvalue >> 1
       sleep(sleepTime)
-    led.value = 0
+
 
   def blink(self, led, onTime, offTime):
       led.value = 1
       sleep(onTime)
       led.value=0
       sleep(offTime)
-
-
-  def baseLoop(self):
-    inc = 0.04
-    lvalue = inc
-    sleepTime = 1/10
-
-    self.black()
-
-    while(lvalue <= 1):
-      self.r.value = round(lvalue, 2)
-      lvalue = lvalue+inc
-      sleep(sleepTime)
-
-    while(lvalue >= 0):
-      self.r.value = round(lvalue, 2)
-      lvalue = lvalue-inc
-      sleep(sleepTime)
-
-
-  def testLoop(self):
-      self.redd(.5)
-      sleep(.5)
-
-      self.redd(1)
-      sleep(.5)
-
-      self.redd(.5)
-      sleep(.5)
-
-      self.redd(0)
-      sleep(.5)
