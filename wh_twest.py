@@ -3,8 +3,8 @@
 from flask import Flask, request, jsonify
 import json
 from multiprocessing import Process, Queue
-from gpiozero import PWMLED
 from time import sleep
+from streamAnimation import StreamAnimation
 from rgb import RGB
 
 app = Flask(__name__)
@@ -19,7 +19,6 @@ def foo():
 @app.route('/event_triggered', methods=['POST'])
 def event_triggered(**kwargs):
     type = request.args.get("type", None)
-    print(type)
     q.put(type)
 
     return {
@@ -27,40 +26,37 @@ def event_triggered(**kwargs):
     }
 
 
-def led_loop(q):
-    rgb = RGB()
-    rgb.white()
-    sleep(0.5)
-    rgb.black()
-    sleep(0.5)
+def led_loop(q, baseClock):
+    rgb = RGB(baseClock)
+    sa = StreamAnimation(rgb)
 
     while True:
         if q.qsize() > 0:
           type = q.get(False)
 
           if type == "modswitch":
-            rgb.modSwitchLoop()
+              sa.banEvent()
 
           elif type == "follows":
-            rgb.followLoop()
+              sa.banEvent()
 
           elif type == "streamchange":
-            rgb.streamChangeLoop()
+              sa.banEvent()
 
-          elif type == "subscription":
-              rgb.black()
-              rgb.subscriptionLoop()
+          elif sa == "subscription":
+              sa.banEvent()
 
           else:
-            print("-> triggers default")
-            rgb.defaultEventLoop()
+              sa.banEvent()
         else:
-            rgb.black()
-            rgb.breath(rgb.r, 1/10, 1<<8, 1<<16)
+            sa.baseLoop()
+
+        sleep(baseClock)
 
 if __name__ == '__main__':
+    baseClock = 1/100
     q = Queue()
-    p = Process(target=led_loop, args=(q,))
+    p = Process(target=led_loop, args=(q,baseClock,))
     p.start()
     app.run(host='0.0.0.0')
     p.join()
