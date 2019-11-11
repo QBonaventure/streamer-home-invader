@@ -1,2 +1,19 @@
-# streamer-home-invader
-Attempt to let Twitch viewers and channel events to control RGB LEDs strips at the poor streamer home !
+# Streamer Home Invader
+
+This is a small personnal project aimed at animating LEDs strips according to my Twitch channel events and viewers interactions. It is made of:
+- the code in here ;
+- short AWS Lambda python function as an API entrypoint for event subscriptions ;
+- subscription script (not included yet) ;
+- simple electronic circuit (3 NPN transistors and 3 capacitors and the led strips) ;
+- a Raspberry Pi ;
+
+# Features
+
+- the three colors are independant, each in its own thread ;
+- barely efficient resource-wise (10-15% CPU at 1 MHz base clock on RasPi for 3 colors, which way ) ;
+- rather simple animation runs made of atomic effects (fade in/out, blinking, breathing, wait, etc.) ;
+- possibility to manage multiple strips (up to five strips on RasPi 3 with 15 GPIO pins available) ;
+
+# Disclaimer
+
+As it is a personnal project, I do not intend to work on abstracting the code to fit various usages (I would rather rewrite it in Elixir). If you bump into this and may need it, simply send a request and I'll check on it.
