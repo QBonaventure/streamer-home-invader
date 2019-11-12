@@ -5,6 +5,7 @@ from time import sleep
 from threading import Thread
 from ledThread import LedThread
 
+
 class RGB:
 
 
@@ -13,42 +14,66 @@ class RGB:
     self.r = LedThread(PWMLED("GPIO5"), baseClock)
     self.g = LedThread(PWMLED("GPIO12"), baseClock)
     self.b = LedThread(PWMLED("GPIO16"), baseClock)
-    self.r2 = LedThread(PWMLED("GPIO20"), baseClock)
-    self.scale = [x/255 for x in (0, 2, 3, 4, 6, 8, 11, 16, 23, 32, 45, 64, 90, 128, 181, 255)]
+    self.r2 = LedThread(PWMLED("GPIO20", False), baseClock)
+    self.g2 = LedThread(PWMLED("GPIO18", False), baseClock)
+    self.b2 = LedThread(PWMLED("GPIO22", False), baseClock)
 
-  def base(self):
-      self.r.toRun(self.breath, 10, (1/30, 1<<20, 1<<24,))
-      self.b.toRun(self.sleep, 1, (1/8,))
-      self.b.toRun(self.breath, 10, (1/30, 1<<20, 1<<24,))
-      self.wait((self.r, self.b,))
 
   def wait(self):
-    ledThreads = (self.r, self.g, self.b,)
-    while all(v.is_active == 0 for v in ledThreads) == False:
-        sleep(self.baseClock)
+    ledThreads = (self.r, self.g, self.b, self.r2,)
+    while sum([t.taskCount for t in ledThreads]) > 0:
+        sleep(.1)
+
+    [t.toRun(self.off, 1) for t in ledThreads]
+
+
+  def stop(self, led):
+      led.queue.clear()
+      led.done()
+
 
   def sleep(self, led, sleepTime):
       sleep(sleepTime)
+      led.done()
 
 
-  def breath(self, led, sleepTime, minValue, maxValue = 1<<8):
-    lvalue = 1<<1
+  def off(self, led, sleepTime=0):
+      led.value = 0
+      sleep(sleepTime)
+      led.done()
 
+
+  def fadeIn(self, led, sleepTime, minValue = 1<<1, maxValue = 1<<24, isSubElement = False):
+    lvalue = minValue
     while(lvalue < maxValue):
-      led.value = (lvalue>>1)/maxValue
+      led.value = lvalue/maxValue
       lvalue = lvalue << 1
       sleep(sleepTime)
+    if isSubElement == False:
+        led.done()
 
-    sleep(sleepTime)
 
+  def fadeOut(self, led, sleepTime, minValue = 1<<1, maxValue = 1<<24, isSubElement = False):
+    lvalue = maxValue
     while(lvalue >= minValue):
       led.value = lvalue/maxValue
       lvalue = lvalue >> 1
       sleep(sleepTime)
+    if isSubElement == False:
+        led.done()
+
+
+  def breath(self, led, sleepTime, minValue, maxValue = 1<<24):
+    lvalue = minValue
+    self.fadeIn(led, sleepTime, minValue, maxValue, True)
+    sleep(sleepTime)
+    self.fadeOut(led, sleepTime, minValue, maxValue, True)
+    led.done()
 
 
   def blink(self, led, onTime, offTime):
       led.value = 1
       sleep(onTime)
-      led.value=0
+      led.value = 0
       sleep(offTime)
+      led.done()

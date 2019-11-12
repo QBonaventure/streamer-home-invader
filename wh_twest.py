@@ -33,28 +33,30 @@ def led_loop(q, baseClock):
     while True:
         if q.qsize() > 0:
           type = q.get(False)
+          # sa.stopAll()
 
           if type == "modswitch":
               sa.banEvent()
 
           elif type == "follows":
-              sa.banEvent()
+              sa.followEvent()
 
           elif type == "streamchange":
               sa.banEvent()
 
-          elif sa == "subscription":
-              sa.banEvent()
+          elif type == "subscription":
+              sa.subEvent()
 
           else:
-              sa.banEvent()
+              sa.followEvent()
         else:
             sa.baseLoop()
+            sa.rgb.wait()
 
         sleep(baseClock)
 
 if __name__ == '__main__':
-    baseClock = 1/100
+    baseClock = 1/1000
     q = Queue()
     p = Process(target=led_loop, args=(q,baseClock,))
     p.start()
