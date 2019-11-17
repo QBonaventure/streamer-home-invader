@@ -12,7 +12,7 @@ This is a small personnal project aimed at animating LEDs strips according to my
 - the three colors are independant, each in its own thread ;
 - barely efficient resource-wise (10-15% CPU at 1 MHz base clock on RasPi for 3 colors, which way ) ;
 - rather simple animation runs made of atomic effects (fade in/out, blinking, breathing, wait, etc.) ;
-- possibility to manage multiple strips (up to five strips on RasPi 3 with 15 GPIO pins available) ;
+- possibility to manage multiple strips (up to three strips on RasPi 3 with 9 GPIO pins and 620Ohms base resistor to stay within the 50mA max output of the Pi) ;
 
 # Disclaimer
 
